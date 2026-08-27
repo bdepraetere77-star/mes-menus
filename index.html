@@ -2,29 +2,29 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Générateur de Menus sur 7 Semaines</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; color: #333; }
-        h1 { color: #2c3e50; }
-        .semaine-title { background: #2c3e50; color: white; padding: 10px; margin-top: 30px; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: white; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        body { font-family: Arial, sans-serif; margin: 15px; background: #f4f4f9; color: #333; }
+        h1 { color: #2c3e50; font-size: 22px; }
+        .semaine-title { background: #2c3e50; color: white; padding: 10px; margin-top: 25px; border-radius: 5px; font-size: 18px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; background: white; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
         a { color: #e67e22; text-decoration: none; font-weight: bold; }
         a:hover { text-decoration: underline; }
-        button { padding: 12px 20px; font-size: 16px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button { padding: 12px 20px; font-size: 16px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
         button:hover { background: #219150; }
     </style>
 </head>
 <body>
 
-    <h1>Générateur de Menus sur 7 Semaines</h1>
-    <button onclick="genererSeptSemaines()">Générer les 7 semaines</button>
+    <h1>Générateur de Menus (7 Semaines)</h1>
+    <button onclick="genererSeptSemaines()">Générer à partir du Lundi 31 Août</button>
 
     <div id="resultats"></div>
 
     <script>
-        // BASE DE DONNÉES DES INGRÉDIENTS (Adapte les mois 0-11 si besoin)
         const legumesDB = [
             { nom: "Courgette", mois: [5, 6, 7, 8] },
             { nom: "Carotte", mois: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
@@ -44,8 +44,8 @@
             { nom: "Fenouil", mois: [4, 5, 6, 7, 8, 9] }
         ];
 
-        const proteinesViandes = ["Poulet", "Dinde", "Bœuf haché", "Rôti de porc", "Veau"];
-        const proteinesPoissons = ["Cabillaud", "Saumon", "Thon", "Lieu noir", "Crevettes"];
+        const proteinesViandes = ["Poulet", "Dinde", "Bœuf haché", "Rôti de porc", "Veau", "Canard"];
+        const proteinesPoissons = ["Cabillaud", "Saumon", "Thon", "Lieu noir", "Crevettes", "Truite"];
         const proteinesVegetales = ["Lentilles vertes", "Pois chiches", "Tofu mariné", "Lentilles corail", "Haricots rouges", "Œufs", "Tempeh"];
         const feculentsBase = ["Riz complet", "Pâtes", "Quinoa", "Pommes de terre", "Semoule", "Sarrasin", "Polenta"];
 
@@ -54,54 +54,50 @@
         }
 
         function genererSeptSemaines() {
-            const moisActuel = new Date().getMonth();
-            
-            // Filtrer les légumes de saison du mois
-            let legumesSaison = legumesDB.filter(l => l.mois.includes(moisActuel)).map(l => l.nom);
-            
-            // Si pas assez de légumes de saison pour l'anti-répétition 15j, on complète
-            if (legumesSaison.length < 15) {
-                legumesSaison = legumesDB.map(l => l.nom); 
-            }
-
-            let historiqueLegumes = []; // Stocke l'historique pour vérifier les 14 jours
+            let historiqueLegumes = [];
             let htmlResultat = "";
-            const joursSemaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+            const joursNom = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+
+            // Définition explicite de la date de départ : Lundi 31 Août 2026
+            let dateCourante = new Date(2026, 7, 31); // 7 = Août en JavaScript (0-11)
 
             for (let s = 1; s <= 7; s++) {
                 htmlResultat += `<h2 class="semaine-title">Semaine ${s}</h2>`;
                 htmlResultat += `<table>
                     <tr>
-                        <th>Jour</th>
+                        <th>Date & Jour</th>
                         <th>Légume (Saison)</th>
                         <th>Protéine</th>
                         <th>Féculent</th>
-                        <th>Idée Recette</th>
+                        <th>Recette</th>
                     </tr>`;
 
-                // Préparation des pools de la semaine
                 let feculentsSemaine = mélanger(feculentsBase);
                 
-                // Quota exact : 3 Viandes, 1 Poisson, 3 Végétales
+                let viandesChoisies = mélanger(proteinesViandes).slice(0, 3);
+                let poissonChoisi = mélanger(proteinesPoissons).slice(0, 1);
+                let vegetalesChoisies = mélanger(proteinesVegetales).slice(0, 3);
+
                 let proteinesSemaine = mélanger([
-                    mélanger(proteinesViandes)[0],
-                    mélanger(proteinesViandes)[1],
-                    mélanger(proteinesViandes)[2],
-                    mélanger(proteinesPoissons)[0],
-                    mélanger(proteinesVegetales)[0],
-                    mélanger(proteinesVegetales)[1],
-                    mélanger(proteinesVegetales)[2]
+                    ...viandesChoisies,
+                    ...poissonChoisi,
+                    ...vegetalesChoisies
                 ]);
 
                 for (let j = 0; j < 7; j++) {
-                    // Sélection du légume pas vu depuis 14 jours
+                    let moisDuJour = dateCourante.getMonth();
+                    
+                    let legumesSaison = legumesDB.filter(l => l.mois.includes(moisDuJour)).map(l => l.nom);
+                    if (legumesSaison.length < 15) {
+                        legumesSaison = legumesDB.map(l => l.nom); 
+                    }
+
                     let legumesValides = legumesSaison.filter(leg => {
                         let dernierIndex = historiqueLegumes.lastIndexOf(leg);
                         if (dernierIndex === -1) return true;
                         return (historiqueLegumes.length - dernierIndex) >= 14;
                     });
 
-                    // Sécurité si blocage
                     if (legumesValides.length === 0) legumesValides = legumesSaison;
                     
                     let legumeChoisi = mélanger(legumesValides)[0];
@@ -110,17 +106,23 @@
                     let proteineChoisie = proteinesSemaine[j];
                     let feculentChoisi = feculentsSemaine[j];
 
-                    // Recherche Marmiton dynamique
+                    let nomJour = joursNom[dateCourante.getDay()];
+                    let jourMois = dateCourante.getDate();
+                    let moisNom = dateCourante.toLocaleDateString('fr-FR', { month: 'short' });
+                    let dateAffichee = `${nomJour} ${jourMois} ${moisNom}`;
+
                     let requete = encodeURIComponent(`${legumeChoisi} ${proteineChoisie} ${feculentChoisi}`);
                     let urlRecette = `https://www.marmiton.org/recettes/recherche.aspx?aqt=${requete}`;
 
                     htmlResultat += `<tr>
-                        <td><strong>${joursSemaine[j]}</strong></td>
+                        <td><strong>${dateAffichee}</strong></td>
                         <td>${legumeChoisi}</td>
                         <td>${proteineChoisie}</td>
                         <td>${feculentChoisi}</td>
-                        <td><a href="${urlRecette}" target="_blank">Voir recette 🔗</a></td>
+                        <td><a href="${urlRecette}" target="_blank">Voir 🔗</a></td>
                     </tr>`;
+
+                    dateCourante.setDate(dateCourante.getDate() + 1);
                 }
 
                 htmlResultat += `</table>`;
